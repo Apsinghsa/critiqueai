@@ -1,4 +1,5 @@
-config.json              
+config.json 
+firebase.json             
 service-account.json   
 *.env                    
 *.local                  
