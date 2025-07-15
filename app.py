@@ -85,7 +85,7 @@ Don't add any greeting and thank you note.
 # Initialize Flask app
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
-CORS(app)
+CORS(app, origins=["https://critiqueai-01.vercel.app"])
 
 cred = credentials.Certificate(firebase_json)
 firebase_admin.initialize_app(cred, {
