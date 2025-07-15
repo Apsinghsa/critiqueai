@@ -89,7 +89,7 @@ function Viewed() {
 
                 try {
                     setLoading(true)
-                    const response = await axios.post("https://critiqueai-app-react-952301619936.us-central1.run.app/view", {
+                    const response = await axios.post("import.meta.env.VITE_API_URL/view", {
                         uid: user.uid,
                         doc_id: doc_id
                     });

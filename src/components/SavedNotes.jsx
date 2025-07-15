@@ -53,7 +53,7 @@ export default function SavedNotes() {
         setCurrentUser(user);
         isLoading(true);
         try {
-          const res = await axios.post("https://critiqueai-app-react-952301619936.us-central1.run.app/get-output", { uid: user.uid });
+          const res = await axios.post("import.meta.env.VITE_API_URL/get-output", { uid: user.uid });
           setudata(res.data.outputs);
         } catch (error) {
           console.log(error.message);
@@ -74,7 +74,7 @@ export default function SavedNotes() {
     setshowURL(true);
     setLoadingURL(true);
     try {
-      const docResponse = await axios.post("https://critiqueai-app-react-952301619936.us-central1.run.app/api/share-output", { user_id: currentUser.uid, doc_id: id });
+      const docResponse = await axios.post("import.meta.env.VITE_API_URL/api/share-output", { user_id: currentUser.uid, doc_id: id });
       setURL(`https://critiqueai.dev/shared/${docResponse.data.sharedDocId}`);
       setLoadingURL(false);
     } catch (error) {
@@ -86,7 +86,7 @@ export default function SavedNotes() {
   const deleteDocument = async (e, id) => {
     e.stopPropagation();
     try {
-      await axios.delete("https://critiqueai-app-react-952301619936.us-central1.run.app/api/delete-output", { data: { user_id: currentUser.uid, doc_id: id } });
+      await axios.delete("import.meta.env.VITE_API_URL/api/delete-output", { data: { user_id: currentUser.uid, doc_id: id } });
       fetchUserDetail();
     } catch (error) {
       console.log(error.message);

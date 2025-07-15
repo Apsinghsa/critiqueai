@@ -35,4 +35,4 @@ dist/
 *.yaml
 
 !.filenignore
-!.gitignore
+!.gitignore.env 

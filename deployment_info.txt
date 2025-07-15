@@ -1,0 +1,7 @@
+Project ID: critiqueai-apsingh
+Region: asia-south1
+Cloud Run Service URL: https://critiqueai-backend-897878695127.asia-south1.run.app
+Artifact Registry Repository: asia-south1-docker.pkg.dev/critiqueai-apsingh/critiqueai-repo
+Cloud Build Logs: https://console.cloud.google.com/cloud-build/builds?project=897878695127
+Cloud Run Service: https://console.cloud.google.com/run/detail/asia-south1/critiqueai-backend/revisions?project=897878695127
+Secrets in Secret Manager: https://console.cloud.google.com/security/secret-manager?project=897878695127

@@ -89,7 +89,7 @@ function Shared() {
         try {
 
             setLoading(true)
-            const response = await axios.get(`https://critiqueai-app-react-952301619936.us-central1.run.app/shared/${id}`);
+            const response = await axios.get(`import.meta.env.VITE_API_URL/shared/${id}`);
             console.log(response.data);
             setshared(response.data.content)
             setLoading(false)
