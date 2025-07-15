@@ -89,7 +89,7 @@ function Shared() {
         try {
 
             setLoading(true)
-            const response = await axios.get(`import.meta.env.VITE_API_URL/shared/${id}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/shared/${id}`);
             console.log(response.data);
             setshared(response.data.content)
             setLoading(false)

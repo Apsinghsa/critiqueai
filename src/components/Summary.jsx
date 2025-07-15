@@ -143,7 +143,7 @@ export default function Summary() {
         console.log(textInput)
 
         try {
-            const res = await axios.post('import.meta.env.VITE_API_URL/summary-out', formData);
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/summary-out`, formData);
             console.log('Server response:', res);
 
             setSummaryOut(res.data.output);
@@ -299,7 +299,7 @@ export default function Summary() {
 
         if (valuser !== "") {
             try {
-                const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
                     uid: valuser,
                     ...smry_data,
                 })
@@ -330,7 +330,7 @@ export default function Summary() {
 
             if (savedData && valuser !== "") {
                 try {
-                    const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
                         uid: valuser,
                         ...savedData,
                     });

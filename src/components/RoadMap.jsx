@@ -93,7 +93,7 @@ export default function RoadMap() {
 
         // Add logic for roadmap generation here
         try {
-            const res = await axios.post("import.meta.env.VITE_API_URL/get-roadmap", SummRes, {
+            const res = await axios.post(`${import.meta.env.VITE_API_URL}/get-roadmap`, SummRes, {
                 headers: {
                     "Content-Type": "text/plain"
                 }
@@ -242,7 +242,7 @@ export default function RoadMap() {
 
         if (valuser !== "") {
             try {
-                const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+                const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
                     uid: valuser,
                     ...data
                 })
@@ -271,7 +271,7 @@ export default function RoadMap() {
 
             if (savedData && valuser !== "") {
                 try {
-                    const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+                    const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
                         uid: valuser,
                         ...savedData,
                     });

@@ -36,3 +36,5 @@ dist/
 
 !.filenignore
 !.gitignore.env 
+
+deployment_info.*

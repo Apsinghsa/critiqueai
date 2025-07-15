@@ -78,7 +78,7 @@ const EvaluateInput = () => {
     setshowres(true);
 
     try {
-      const res = await axios.post("import.meta.env.VITE_API_URL/evaluate", {
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/evaluate`, {
         text: text
       });
 
@@ -125,7 +125,7 @@ const EvaluateInput = () => {
     formData.append('guestId', generateRandomId(10));
 
     try {
-      const res = await axios.post("import.meta.env.VITE_API_URL/evaluate", formData);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/evaluate`, formData);
       console.log('Response:', res.data);
       isloading(false);
       setScore(res.data.score);

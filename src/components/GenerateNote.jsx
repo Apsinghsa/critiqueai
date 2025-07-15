@@ -120,7 +120,7 @@ export default function GenerateNote() {
     isLoading(true);
 
     try {
-      const res = await axios.post('import.meta.env.VITE_API_URL/content-out', data);
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}/content-out`, data);
       console.log("Server response:", res);
       setNotes_Out(res.data.output)
       isLoading(false);
@@ -265,7 +265,7 @@ export default function GenerateNote() {
     if (valuser !== "") {
 
       try {
-        const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+        const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
           uid: valuser,
           ...generateData
         })
@@ -297,7 +297,7 @@ export default function GenerateNote() {
 
       if (savedData && valuser !== "") {
         try {
-          const res = await axios.post("import.meta.env.VITE_API_URL/set-output", {
+          const res = await axios.post(`${import.meta.env.VITE_API_URL}/set-output`, {
             uid: valuser,
             ...savedData,
           });
