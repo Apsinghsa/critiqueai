@@ -5,7 +5,7 @@
 
 ## 🔗 Project Link
 🌐 [Visit Critique AI →](https://critiqueai-01.vercel.app/)
-<div style='color: red'>&#9888; CURRENTLY DOWN</div>
+<div style='color: red'>&#9888; BACKEND CURRENTLY DOWN</div>
 
 ## 🚀 Features
 
