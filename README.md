@@ -4,8 +4,8 @@
 
 
 ## 🔗 Project Link
-
 🌐 [Visit Critique AI →](https://critiqueai.dev)
+<div style='color: red'>&#9888; CURRENTLY DOWN</div>
 
 ## 🚀 Features
 
