@@ -4,7 +4,7 @@
 
 
 ## 🔗 Project Link
-🌐 [Visit Critique AI →](https://critiqueai.dev)
+🌐 [Visit Critique AI →](https://critiqueai-01.vercel.app/)
 <div style='color: red'>&#9888; CURRENTLY DOWN</div>
 
 ## 🚀 Features
