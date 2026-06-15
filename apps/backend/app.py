@@ -70,7 +70,7 @@ Don't add any greeting and thank you note.
 # Initialize Flask app
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
-CORS(app)
+CORS(app, origins=["http://localhost:3000", "http://localhost:8000"])
 
 cred = credentials.Certificate("firebase.json")
 firebase_admin.initialize_app(cred, {

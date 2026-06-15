@@ -1,0 +1,25 @@
+version: "3.9"
+
+services:
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:8080"
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8000
+
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8080"
+    env_file:
+      - ./apps/backend/.env
+    volumes:
+      - ./apps/backend/firebase.json:/app/firebase.json:ro
+      - ./apps/backend/service-account.json:/app/service-account.json:ro
