@@ -4,9 +4,8 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import '../styles/Navbar.css';
 import { FiLogIn } from 'react-icons/fi';
-import { doc, getDoc } from 'firebase/firestore';
 import { CgLogOut } from 'react-icons/cg';
-import { auth, db } from './firebase/firebase';
+import { supabase } from '../lib/supabase';
 import { Slide, toast } from 'react-toastify';
 import { GrNotes } from 'react-icons/gr';
 import { FaBars, FaTimes } from 'react-icons/fa';
@@ -86,30 +85,28 @@ const Navbar = () => {
     handleLinkClick(); // Close menu on click
   }
 
-  const fetchUserDetail = async () => {
-    auth.onAuthStateChanged(async (user) => {
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const user = session?.user;
       if (user) {
-        setUserURL(user.photoURL);
-        const docRef = doc(db, "Users", user.uid);
-        const userdata = await getDoc(docRef);
-        if (userdata.exists()) {
-          setUserDetail(userdata.data());
-        }
+        setUserURL(user.user_metadata?.avatar_url || null);
+        setUserDetail({
+          firstName: user.user_metadata?.full_name?.split(' ')[0] || user.email,
+          lastName: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
+          email: user.email,
+        });
       } else {
         setUserDetail(null);
         setUserURL(null);
       }
     });
-  };
-
-  useEffect(() => {
-    fetchUserDetail();
+    return () => subscription.unsubscribe();
   }, []);
 
 
   const LogOutUser = async () => {
     try {
-      await auth.signOut();
+      await supabase.auth.signOut();
       localStorage.clear();
 
       toast.success("Logged Out Successfully", {
