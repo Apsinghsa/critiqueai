@@ -1,15 +1,11 @@
 flask
 python-docx
-odfdo
 markdown2
-requests
 werkzeug
-google-generativeai
 google-genai
-dotenv
+python-dotenv
 gunicorn
 flask-cors
 supabase
 pymupdf
 pdfplumber
-odfpy

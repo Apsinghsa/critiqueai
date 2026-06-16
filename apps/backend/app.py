@@ -77,6 +77,8 @@ FLASH_LITE = 'gemini-2.0-flash-lite'
 # Initialize Supabase client
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise RuntimeError("SUPABASE_URL and SUPABASE_SERVICE_KEY must be set")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
@@ -299,11 +301,11 @@ def extract_tables(content, page_index):
             if page_index < len(pdf.pages):
                 page = pdf.pages[page_index]
                 extracted_tables = page.extract_tables()
-            for table_index, table in enumerate(extracted_tables, start=1):
-                tables.append({
-                    "table_number": table_index,
-                    "data": table
-                })
+                for table_index, table in enumerate(extracted_tables, start=1):
+                    tables.append({
+                        "table_number": table_index,
+                        "data": table
+                    })
     except Exception as e:
         tables.append(f"[Table error: {str(e)}]")
     return tables
@@ -400,22 +402,27 @@ def extract_docx_content(content):
 
 
 def upload_files(file, session):
-    unique_filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
-    file_bytes = file.read()
-    supabase.storage.from_('user-files').upload(
-        f"sessions/{session}/{unique_filename}",
-        file_bytes,
-        {"content-type": file.content_type}
-    )
-    url = supabase.storage.from_('user-files').get_public_url(
-        f"sessions/{session}/{unique_filename}"
-    )
-    supabase.table('user_files').insert({
-        "session_id": session,
-        "filename": unique_filename,
-        "url": url,
-        "uploaded_at": datetime.now(timezone.utc).isoformat()
-    }).execute()
+    try:
+        unique_filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
+        file_bytes = file.read()
+        supabase.storage.from_('user-files').upload(
+            f"sessions/{session}/{unique_filename}",
+            file_bytes,
+            {"content-type": file.content_type}
+        )
+        url = supabase.storage.from_('user-files').get_public_url(
+            f"sessions/{session}/{unique_filename}"
+        )
+        supabase.table('user_files').insert({
+            "session_id": session,
+            "filename": unique_filename,
+            "url": url,
+            "uploaded_at": datetime.now(timezone.utc).isoformat()
+        }).execute()
+        return True
+    except Exception as e:
+        print(f"Upload failed for {file.filename}: {e}")
+        return False
 
 # Function to get file content from Google Cloud Storage
 def get_user_files(session_id, time):
@@ -432,17 +439,17 @@ def get_user_files(session_id, time):
     return file_urls
 
 
-def read_file_from_gcs(gs_url):
+def read_file_from_storage(file_url):
     """Reads a file as bytes directly from Supabase Storage."""
-    file_path = gs_url.split('/storage/v1/object/public/user-files/')[-1]
+    file_path = file_url.split('/storage/v1/object/public/user-files/')[-1]
     file_bytes = supabase.storage.from_('user-files').download(file_path)
     filename = file_path.split('/')[-1]
     return file_bytes, filename
 
 
-def process_file(gs_url):
+def process_file(file_url):
     """Processes a file based on its type (Text, PDF, DOCX, Image)."""
-    file_bytes, filename = read_file_from_gcs(gs_url)
+    file_bytes, filename = read_file_from_storage(file_url)
     file_ext = filename.split(".")[-1].lower()
 
     # Plain text files
@@ -618,9 +625,6 @@ def summary_out():
                     combined_text += process_file(
                         url) + "\n\n***************************************************\n\n"
 
-                with open("output_final.txt", "w", encoding="utf-8") as final:
-                    final.write(combined_text)
-
                 print("Instructions - ", instruction)
                 combined_summary = get_evaluation(
                     combined_text, isInstruction=instruction)
@@ -643,9 +647,6 @@ def summary_out():
                 for url in file_url:
                     combined_text += process_file(
                         url) + "\n\n***************************************************\n\n"
-
-                with open("output_final.txt", "w", encoding="utf-8") as final:
-                    final.write(combined_text)
 
                 combined_summary = get_evaluation(combined_text)
                 temp = markdown2.markdown(
@@ -830,7 +831,7 @@ def evaluate():
                     upload_files(file, session_id)
                     # session_id = session.get('session_id')
                     file_url = get_user_files(session_id, time)
-                    file_content, name = read_file_from_gcs(file_url[0])
+                    file_content, name = read_file_from_storage(file_url[0])
                     file_extension = name.split(".")[-1].lower()
 
                     if file_extension == 'txt':
