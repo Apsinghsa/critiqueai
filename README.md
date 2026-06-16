@@ -46,11 +46,19 @@ npm install
 npm run dev
 ```
 
-**Backend:**
+**Backend (using uv):**
+
+Install uv if you don't have it:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Set up and run the backend:
 ```bash
 cd apps/backend
-pip install -r requirements.txt
-python app.py
+uv venv
+uv pip install -r requirements.txt
+uv run python app.py
 ```
 
 ## Environment Variables
