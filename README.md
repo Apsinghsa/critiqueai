@@ -56,8 +56,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Set up and run the backend:
 ```bash
 cd apps/backend
-uv venv
-uv pip install -r requirements.txt
+uv sync
 uv run python app.py
 ```
 
