@@ -10,9 +10,8 @@
 
 ```
 critiqueai/
-├── apps/
-│   ├── frontend/   # React (Vite) app
-│   └── backend/    # Flask API server
+├── frontend/    # React (Vite) app
+├── backend/     # Flask API server
 ├── docker-compose.yml
 └── README.md
 ```
@@ -24,7 +23,7 @@ critiqueai/
 - **Roadmap Creation** — Enter a topic and get a complete learning roadmap.
 - **Multi-File Summarization** — Supports PDF, DOCX, TXT, JPG, PNG, and JPEG.
 - **Deep File Analysis** — Custom Python engine extracts text, images, and tables from PDFs.
-- **Secure & Clean Workflow** — Built on GCP with Cloud Run and Supabase for storage and database.
+- **Secure & Clean Workflow** — Built on Supabase for auth, database, and storage.
 
 ## Quick Start
 
@@ -41,7 +40,7 @@ docker-compose up --build
 
 **Frontend:**
 ```bash
-cd apps/frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -55,14 +54,14 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 Set up and run the backend:
 ```bash
-cd apps/backend
+cd backend
 uv sync
 uv run python app.py
 ```
 
 ## Environment Variables
 
-### Frontend (`apps/frontend/.env`)
+### Frontend (`frontend/.env`)
 
 | Variable | Description |
 |---|---|
@@ -70,13 +69,13 @@ uv run python app.py
 | `VITE_SUPABASE_URL` | Supabase project URL |
 | `VITE_SUPABASE_ANON_KEY` | Supabase anonymous/public key |
 
-### Backend (`apps/backend/.env`)
+### Backend (`backend/.env`)
 
 | Variable | Description |
 |---|---|
 | `GEN_API2` | Google Generative AI API key |
 | `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_SERVICE_KEY` | Supabase service_role key (NOT anon key)
+| `SUPABASE_SERVICE_KEY` | Supabase service_role key (NOT anon key) |
 
 ## Supported File Formats
 

@@ -53,3 +53,4 @@ images/
 # Filenignore
 !.filenignore
 !.gitignore
+frontend/node_modules/
