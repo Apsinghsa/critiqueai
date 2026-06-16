@@ -4,7 +4,7 @@
 
 ## Project Link
 
-[Visit Critique AI →](https://critiqueai.dev)
+[Visit Critique AI →](https://critiqueai00.vercel.app)
 
 ## Project Structure
 
@@ -26,15 +26,6 @@ critiqueai/
 - **Secure & Clean Workflow** — Built on Supabase for auth, database, and storage.
 
 ## Quick Start
-
-### Using Docker (recommended)
-
-```bash
-docker-compose up --build
-```
-
-- Frontend: http://localhost:3000
-- Backend: http://localhost:8000
 
 ### Local Development
 
@@ -59,6 +50,35 @@ uv sync
 uv run python app.py
 ```
 
+## Deployment
+
+### Frontend (Vercel)
+
+1. Set **Root Directory** to `frontend` in project settings.
+2. Build Command: `npm run build`
+3. Output Directory: `dist`
+4. Environment Variables:
+
+| Variable | Value |
+|---|---|
+| `VITE_API_URL` | Your Render backend URL (e.g., `https://critiqueai.onrender.com`) |
+| `VITE_SUPABASE_URL` | `https://tyhuvtasvuydlieylvbz.supabase.co` |
+| `VITE_SUPABASE_ANON_KEY` | Your Supabase anonymous key |
+
+### Backend (Render)
+
+1. Set **Root Directory** to `backend` in project settings.
+2. Build Command: `pip install uv && uv sync --frozen --no-dev`
+3. Start Command: `gunicorn app:app`
+4. Environment Variables:
+
+| Variable | Value |
+|---|---|
+| `GEN_API2` | Your Gemini API key |
+| `SUPABASE_URL` | `https://tyhuvtasvuydlieylvbz.supabase.co` |
+| `SUPABASE_SERVICE_KEY` | Your Supabase service_role key |
+| `CORS_ORIGINS` | Your Vercel URL (e.g., `https://critiqueai00.vercel.app`) |
+
 ## Environment Variables
 
 ### Frontend (`frontend/.env`)
@@ -76,6 +96,7 @@ uv run python app.py
 | `GEN_API2` | Google Generative AI API key |
 | `SUPABASE_URL` | Supabase project URL |
 | `SUPABASE_SERVICE_KEY` | Supabase service_role key (NOT anon key) |
+| `CORS_ORIGINS` | Comma-separated list of allowed origins |
 
 ## Supported File Formats
 
