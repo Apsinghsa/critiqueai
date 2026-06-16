@@ -6,6 +6,26 @@
 
 [Visit Critique AI →](https://critiqueai00.vercel.app)
 
+## Features
+
+- **Instant Grading**
+  Upload answers and receive quick scores, feedback, and improvement tips.
+
+- **Note Generation**
+  Create clear, structured notes from any content. Users can also provide custom instructions.
+
+- **Roadmap Creation**
+  Just enter a topic, and get a complete learning roadmap — no extra input needed.
+
+- **Multi-File Summarization**
+  Supports multiple files like PDF, DOCX, TXT, JPG, PNG, and JPEG for summarization in one go.
+
+- **Deep File Analysis**
+  Custom Python engine extracts text, images (described using Gemini), and tables from PDFs.
+
+- **Secure & Clean Workflow**
+  Built on Supabase for auth, database, and storage. Files are auto-deleted after processing.
+
 ## Project Structure
 
 ```
@@ -14,15 +34,6 @@ critiqueai/
 ├── backend/     # Flask API server
 └── README.md
 ```
-
-## Features
-
-- **Instant Grading** — Upload answers and receive quick scores, feedback, and improvement tips.
-- **Note Generation** — Create clear, structured notes from any content.
-- **Roadmap Creation** — Enter a topic and get a complete learning roadmap.
-- **Multi-File Summarization** — Supports PDF, DOCX, TXT, JPG, PNG, and JPEG.
-- **Deep File Analysis** — Custom Python engine extracts text, images, and tables from PDFs.
-- **Secure & Clean Workflow** — Built on Supabase for auth, database, and storage.
 
 ## Quick Start
 
@@ -71,6 +82,38 @@ uv run python app.py
 ## Supported File Formats
 
 `.pdf`, `.docx`, `.txt`, `.jpg`, `.jpeg`, `.png`
+
+## How It Works
+
+1. Users provide text or upload files.
+2. Text is directly sent to Gemini for processing.
+3. Uploaded files are temporarily stored in Supabase Storage.
+4. Each file's data is extracted into text using a custom Python engine.
+5. Extracted text is passed to Gemini AI for summarization, evaluation, or note-making.
+6. Output is shown to the user instantly.
+7. Uploaded files are deleted after use.
+
+## Custom PDF Handler
+
+Since AI models can't directly read or interpret PDFs properly, a custom Python function was developed to:
+
+- Extract text, images, and tables from PDFs page-by-page
+- Describe images using Gemini
+- Format everything into clean, structured JSON
+- Pass it to Gemini for smart processing
+
+This enables rich analysis of academic documents and handwritten notes.
+
+## Future Plans
+
+- Fine-tune a custom AI model for smarter evaluations
+- Improve file processing speed
+- Support more file types
+
+## Problem It Solves
+
+> Students need quick feedback, but grading takes time.
+> **Critique AI** automates the entire evaluation process — giving instant scores, feedback, notes, and summaries — making learning easier and faster.
 
 ## License
 
