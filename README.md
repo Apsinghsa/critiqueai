@@ -1,6 +1,6 @@
 # Critique AI
 
-**Critique AI** is an intelligent answer evaluation tool designed for students. It offers instant grading, feedback, note generation, roadmap creation, and multi-file summarization — all powered by Gemini AI and Google Cloud services.
+**Critique AI** is an intelligent answer evaluation tool designed for students. It offers instant grading, feedback, note generation, roadmap creation, and multi-file summarization — all powered by Gemini AI and Supabase.
 
 ## Project Link
 
@@ -24,7 +24,7 @@ critiqueai/
 - **Roadmap Creation** — Enter a topic and get a complete learning roadmap.
 - **Multi-File Summarization** — Supports PDF, DOCX, TXT, JPG, PNG, and JPEG.
 - **Deep File Analysis** — Custom Python engine extracts text, images, and tables from PDFs.
-- **Secure & Clean Workflow** — Built on GCP with Cloud Run, Firebase Storage, Firestore, and Vision API.
+- **Secure & Clean Workflow** — Built on GCP with Cloud Run and Supabase for storage and database.
 
 ## Quick Start
 
@@ -60,18 +60,16 @@ python app.py
 | Variable | Description |
 |---|---|
 | `VITE_API_URL` | Backend API URL (default: `http://localhost:8000`) |
-| `VITE_FIREBASE_API_KEY` | Firebase API key |
+| `VITE_SUPABASE_URL` | Supabase project URL |
+| `VITE_SUPABASE_ANON_KEY` | Supabase anonymous/public key |
 
 ### Backend (`apps/backend/.env`)
 
 | Variable | Description |
 |---|---|
 | `GEN_API2` | Google Generative AI API key |
-
-### Required Files (backend)
-
-- `apps/backend/firebase.json` — Firebase credentials
-- `apps/backend/service-account.json` — Google Cloud service account
+| `SUPABASE_URL` | Supabase project URL |
+| `SUPABASE_SERVICE_KEY` | Supabase service_role key (NOT anon key)
 
 ## Supported File Formats
 
@@ -81,7 +79,7 @@ python app.py
 
 1. Users provide text or upload files.
 2. Text is sent to Gemini for processing.
-3. Uploaded files are temporarily stored in Firebase Storage.
+3. Uploaded files are temporarily stored in Supabase Storage.
 4. File data is extracted (text, images, tables) using the custom Python engine.
 5. Extracted content is passed to Gemini AI for summarization, evaluation, or note-making.
 6. Output is shown to the user instantly.

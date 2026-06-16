@@ -10,8 +10,6 @@ apps/frontend/build/
 
 # Environment files
 apps/backend/.env
-apps/backend/firebase.json
-apps/backend/service-account.json
 *.env
 *.local
 *.secret
