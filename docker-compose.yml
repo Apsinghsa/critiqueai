@@ -20,6 +20,3 @@ services:
       - "8000:8080"
     env_file:
       - ./apps/backend/.env
-    volumes:
-      - ./apps/backend/firebase.json:/app/firebase.json:ro
-      - ./apps/backend/service-account.json:/app/service-account.json:ro

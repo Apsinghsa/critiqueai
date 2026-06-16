@@ -8,17 +8,14 @@ import markdown2
 from google import genai
 from google.genai import types
 from datetime import datetime, timezone, timedelta
-from google.cloud import storage, vision
 from PIL import Image
 from io import BytesIO
 import zipfile
-import firebase_admin
-from firebase_admin import credentials, storage, firestore
 import uuid
-from google.oauth2 import service_account  # Added import
-from dotenv import load_dotenv  # Added import
+from dotenv import load_dotenv
 import io
 import base64
+from supabase import create_client, Client
 
 
 # Load environment variables from .env file
@@ -39,7 +36,7 @@ DONT ADD ANY SUMMARY STARTING LINE. JUST START SUMMART DIRECTLY.
 
 For each file:
 Extract key points and organize them under a relevant heading based on the file's content.
-Maintain the summary length in proportion to the content’s significance; do not unnecessarily shorten it.
+Maintain the summary length in proportion to the content's significance; do not unnecessarily shorten it.
 Use bullet points for clarity and readability.
 Do not include any greetings or salutations.
 
@@ -72,26 +69,15 @@ app = Flask(__name__)
 # app.secret_key = os.urandom(24)
 CORS(app, origins=["http://localhost:3000", "http://localhost:8000"])
 
-cred = credentials.Certificate("firebase.json")
-firebase_admin.initialize_app(cred, {
-    "storageBucket": "instant-theater-449913-h4.firebasestorage.app"
-})
-
-
 # Configure the Google Generative AI API
 client = genai.Client(api_key=os.getenv('GEN_API2'))
 FLASH = 'gemini-2.0-flash'
 FLASH_LITE = 'gemini-2.0-flash-lite'
 
-bucket = storage.bucket()
-db = firestore.client()
-
-# Initialize GCS client
-credentials = service_account.Credentials.from_service_account_file(
-    'service-account.json')
-
-# Initialize all Google Cloud clients with the same credentials
-vision_client = vision.ImageAnnotatorClient(credentials=credentials)
+# Initialize Supabase client
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_KEY')
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
 # Define allowed file extensions
@@ -195,12 +181,23 @@ def process_pdf_file(pdf_bytes):
 
 # Image File
 def process_img_file(image_content):
-    # img_file = PIL.Image.open(path)
-    image = vision.Image(content=image_content)
-    text_response = vision_client.text_detection(image=image)
-    text = text_response.text_annotations[0].description if text_response.text_annotations else ""
-
-    return get_evaluate(text)
+    img_base64 = base64.b64encode(image_content).decode("utf-8")
+    response = client.models.generate_content(
+        model=FLASH,
+        contents=[
+            {"text": "Extract all text from this image. Return only the extracted text, nothing else."},
+            {"inline_data": {
+                "mime_type": "image/png",
+                "data": img_base64
+            }}
+        ],
+        config=types.GenerateContentConfig(
+            max_output_tokens=2000,
+            temperature=0.1
+        )
+    )
+    extracted_text = response.text if response.candidates else ""
+    return get_evaluate(extracted_text)
 
 
 # Docx File
@@ -329,12 +326,6 @@ def extract_pdf_content(pdf_bytes):
         }
         extracted_data.append(page_content)
 
-    # json_filename = "output_pdf.json"
-    # with open(json_filename, "w", encoding="utf-8") as json_file:
-    #     json.dump(extracted_data, json_file, indent=4, ensure_ascii=False)
-
-    # print(f"[+] Extraction complete. Data saved to {json_filename}")
-
     # Convert the extracted_data list to a string
     result = "PDF CONTENT BELOW HERE\n"
     for page in extracted_data:
@@ -408,47 +399,45 @@ def extract_docx_content(content):
         return f"DOCX Error: {str(e)}"
 
 
-# Function to upload file to Google Cloud Storage
 def upload_files(file, session):
-    # session_id = session.get('session_id')
     unique_filename = f"{uuid.uuid4()}.{file.filename.split('.')[-1]}"
-    blob = bucket.blob(f"sessions/{session}/{unique_filename}")
-    blob.upload_from_file(file)
-    blob.make_public()
-    url = f"gs://instant-theater-449913-h4.firebasestorage.app/sessions/{session}/{unique_filename}"
-
-    print(session)
-    print("file uploaded now updating db")
-
-    db.collection("user_files").document(unique_filename).set({
+    file_bytes = file.read()
+    supabase.storage.from_('user-files').upload(
+        f"sessions/{session}/{unique_filename}",
+        file_bytes,
+        {"content-type": file.content_type}
+    )
+    url = supabase.storage.from_('user-files').get_public_url(
+        f"sessions/{session}/{unique_filename}"
+    )
+    supabase.table('user_files').insert({
         "session_id": session,
         "filename": unique_filename,
         "url": url,
-        "uploaded_at": datetime.now(timezone.utc)
-    })
+        "uploaded_at": datetime.now(timezone.utc).isoformat()
+    }).execute()
 
 # Function to get file content from Google Cloud Storage
 def get_user_files(session_id, time):
-    """Fetches gs:// URLs for a user from Firestore."""
+    """Fetches URLs for a user from Supabase."""
 
-    docs = db.collection("user_files").where(
-        "session_id", "==", session_id).stream()
+    response = supabase.table('user_files').select('*').eq(
+        'session_id', session_id
+    ).execute()
     file_urls = []
-    for doc in docs:
-        file_data = doc.to_dict()
-        if file_data["uploaded_at"] >= time:
-            file_url = file_data["url"]
-            file_urls.append(file_url)
+    for record in response.data:
+        if record['uploaded_at'] >= time.isoformat():
+            file_urls.append(record['url'])
 
     return file_urls
 
 
 def read_file_from_gcs(gs_url):
-    """Reads a file as bytes directly from Firebase Storage."""
-    file_path = '/'.join(gs_url.split('/')[3:])
-    blob = bucket.blob(file_path)
-    print("BLOB NAME - ", blob.name)
-    return blob.download_as_bytes(), blob.name
+    """Reads a file as bytes directly from Supabase Storage."""
+    file_path = gs_url.split('/storage/v1/object/public/user-files/')[-1]
+    file_bytes = supabase.storage.from_('user-files').download(file_path)
+    filename = file_path.split('/')[-1]
+    return file_bytes, filename
 
 
 def process_file(gs_url):
@@ -477,42 +466,34 @@ def process_file(gs_url):
 # <---------- Summary Page Functions Ends Here ------------>
 
 
-# <---------- Save Output to Firebase ----------->
+# <---------- Save Output to Supabase ----------->
 def set_output_helper(user, head, data, time, typ):
-    user_id = user
-    parent_doc = db.collection("Users").document(user_id)
-    outputs_ref = parent_doc.collection("outputs")
     output_id = str(uuid.uuid4())
-
-    output_data = {
+    supabase.table('outputs').insert({
+        "id": output_id,
+        "user_id": user,
         "name": head,
         "time": time,
         "content": data,
         "type": typ
-    }
-
-    outputs_ref.document(output_id).set(output_data)
-    print("data written successfully")
+    }).execute()
     return output_id
 
 
 def get_output_helper(user):
-    parent_doc = db.collection("Users").document(user)
-
-    # Access 'outputs' subcollection
-    outputs_ref = parent_doc.collection("outputs")
-    outputs = outputs_ref.stream()
+    response = supabase.table('outputs').select('*').eq(
+        'user_id', user
+    ).execute()
 
     output_list = []
 
-    for doc in outputs:
-        data = doc.to_dict()
+    for doc in response.data:
         output_list.append({
-            "id": doc.id,
-            "name": data.get("name"),
-            "type": data.get("type"),
-            "time": data.get("time"),
-            "content": data.get("content")
+            "id": doc['id'],
+            "name": doc.get('name'),
+            "type": doc.get('type'),
+            "time": doc.get('time'),
+            "content": doc.get('content')
         })
 
     return output_list
@@ -568,7 +549,7 @@ def generate_content():
             except Exception as e:
                 return jsonify({"error": f"Error Generating Notes: {str(e)}"}), 500
     except Exception as e:
-        print("🔥ERROR: ", str(e))
+        print("ERROR: ", str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -633,7 +614,6 @@ def summary_out():
 
                 # session_id = session.get('session_id')
                 file_url = get_user_files(session_id, time)
-                # print("URL LIST AT FIREBASE - ", file_url)
                 for url in file_url:
                     combined_text += process_file(
                         url) + "\n\n***************************************************\n\n"
@@ -660,7 +640,6 @@ def summary_out():
 
                 # session_id = session.get('session_id')
                 file_url = get_user_files(session_id, time)
-                # print("URL LIST AT FIREBASE - ", file_url)
                 for url in file_url:
                     combined_text += process_file(
                         url) + "\n\n***************************************************\n\n"
@@ -720,13 +699,12 @@ def view_output():
         if not uid or not doc_id:
             return jsonify({"error": "Missing UID or Document ID"}), 400
 
-        # Reference to the specific output document
-        doc_ref = db.collection("Users").document(
-            uid).collection("outputs").document(doc_id)
-        doc = doc_ref.get()
+        response = supabase.table('outputs').select('*').eq(
+            'id', doc_id
+        ).eq('user_id', uid).execute()
 
-        if doc.exists:
-            return jsonify(doc.to_dict()), 200
+        if response.data:
+            return jsonify(response.data[0]), 200
         else:
             return jsonify({"error": "Document not found"}), 404
 
@@ -744,8 +722,9 @@ def delete_output():
         return jsonify({"error": "Missing user_id or doc_id"}), 400
 
     try:
-        db.collection("Users").document(user_id).collection(
-            "outputs").document(doc_id).delete()
+        supabase.table('outputs').delete().eq(
+            'id', doc_id
+        ).eq('user_id', user_id).execute()
         return jsonify({"status": "success"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -760,37 +739,31 @@ def share_output():
     if not doc_id or not user_id:
         return jsonify({"error": "outputDocId and userUid required"}), 400
 
-    # Fetch the original output doc
-    original_doc_ref = db.collection('Users').document(
-        user_id).collection('outputs').document(doc_id)
-    original_doc = original_doc_ref.get()
+    original = supabase.table('outputs').select('*').eq(
+        'id', doc_id
+    ).eq('user_id', user_id).execute()
 
-    if not original_doc.exists:
+    if not original.data:
         return jsonify({"error": "Original output document not found"}), 404
 
-    original_data = original_doc.to_dict()
+    original_data = original.data[0]
+    original_data['copyTime'] = datetime.now(timezone.utc).isoformat()
+    shared_id = str(uuid.uuid4())
+    original_data['id'] = shared_id
+    supabase.table('shared').insert(original_data).execute()
 
-    # Add the copyTime with UTC time
-    copied_data = dict(original_data)
-    copied_data['copyTime'] = datetime.now(timezone.utc)
-
-    # Create a new document in 'shared' collection with copied data
-    shared_doc_ref = db.collection('shared').document()
-    shared_doc_ref.set(copied_data)
-
-    return jsonify({"sharedDocId": shared_doc_ref.id}), 200
+    return jsonify({"sharedDocId": shared_id}), 200
 
 
 @app.route('/shared/<doc_id>', methods=['GET'])
 def get_shared_doc(doc_id):
     try:
-        shared_doc_ref = db.collection('shared').document(doc_id)
-        shared_doc = shared_doc_ref.get()
+        response = supabase.table('shared').select('*').eq('id', doc_id).execute()
 
-        if not shared_doc.exists:
+        if response.data:
+            return jsonify(response.data[0]), 200
+        else:
             return jsonify({"error": "Shared document not found"}), 404
-
-        return jsonify(shared_doc.to_dict()), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -800,56 +773,39 @@ def get_shared_doc(doc_id):
 def delete_expired_shared_docs():
     print("Cleanup for shared docs started.")
 
-    # 30 minutes ago from current UTC time
-    expiration_time = datetime.now(timezone.utc) - timedelta(minutes=30)
+    expiration_time = (datetime.now(timezone.utc) - timedelta(minutes=30)).isoformat()
 
-    # Query the shared collection for expired docs
-    expired_docs = db.collection("shared").where(
-        "copyTime", "<", expiration_time
-    ).stream()
+    supabase.table('shared').delete().lt('copyTime', expiration_time).execute()
 
-    deleted_count = 0
-    batch = db.batch()
-
-    for doc in expired_docs:
-        print(f"Deleting shared doc: {doc.id}")
-        batch.delete(doc.reference)
-        deleted_count += 1
-
-    batch.commit()
-    return jsonify({"deleted": deleted_count}), 200
+    return jsonify({"status": "cleaned"}), 200
 
 
-# Route for deleting user files from firebase bucket
+# Route for deleting user files from Supabase bucket
 @app.route('/delete-user-files', methods=['GET'])
 def accountcleanup():
     print("Delete Function is called.")
-    expiration_time = datetime.now(timezone.utc) - timedelta(minutes=2)
+    expiration_time = (datetime.now(timezone.utc) - timedelta(minutes=2)).isoformat()
 
-    docs = db.collection("user_files").where(
-        "uploaded_at", "<", expiration_time).stream()
+    docs = supabase.table('user_files').select('*').lt('uploaded_at', expiration_time).execute()
 
     deleted_files = []
 
-    for doc in docs:
-        data = doc.to_dict()
-        session_id = data.get("session_id")
-        filename = data.get("filename")
+    for doc in docs.data:
+        session_id = doc.get('session_id')
+        filename = doc.get('filename')
 
         if session_id and filename:
             file_path = f"sessions/{session_id}/{filename}"
-            blob = bucket.blob(file_path)
-
             try:
-                blob.delete()
-                db.collection("user_files").document(doc.id).delete()
+                supabase.storage.from_('user-files').remove(file_path)
+                supabase.table('user_files').delete().eq('id', doc['id']).execute()
                 print(f"Deleted: {file_path}")
                 deleted_files.append(filename)
             except Exception as e:
                 print(f"Failed to delete {file_path}: {e}")
 
     if not deleted_files:
-        return "No Files at Firebase\n", 200
+        return "No Files\n", 200
 
     return jsonify({"deleted_files": deleted_files}), 200
 
