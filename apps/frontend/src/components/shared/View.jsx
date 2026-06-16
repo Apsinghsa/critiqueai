@@ -6,7 +6,7 @@ import { IoMdArrowBack } from 'react-icons/io';
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import html2pdf from "html2pdf.js";
-import { auth } from '../firebase/firebase';
+import { supabase } from '../../lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_URL || "https://critiqueai-app-react-952301619936.us-central1.run.app";
 
@@ -85,14 +85,15 @@ function Viewed() {
 
 
     useEffect(() => {
-        auth.onAuthStateChanged(async (user) => {
+        const fetchDocument = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
             if (user && doc_id) {
                 console.log(user);
 
                 try {
                     setLoading(true)
                     const response = await axios.post(`${API_BASE}/view`, {
-                        uid: user.uid,
+                        uid: user.id,
                         doc_id: doc_id
                     });
                     console.log(response.data);
@@ -110,7 +111,8 @@ function Viewed() {
                 setLoading(false)
                 setnotfound(true)
             }
-        })
+        };
+        fetchDocument();
     }, [])
 
 

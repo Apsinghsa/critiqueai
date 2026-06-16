@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import '../styles/SavedNotes.css';
-import { auth } from './firebase/firebase';
+import { supabase } from '../lib/supabase';
 import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoMdClose } from "react-icons/io";
@@ -50,21 +50,20 @@ export default function SavedNotes() {
   }, []);
 
   const fetchUserDetail = async () => {
-    auth.onAuthStateChanged(async (user) => {
-      if (user) {
-        setCurrentUser(user);
-        isLoading(true);
-        try {
-          const res = await axios.post(`${API_BASE}/get-output`, { uid: user.uid });
-          setudata(res.data.outputs);
-        } catch (error) {
-          console.log(error.message);
-        }
-        isLoading(false);
-      } else {
-        setnotaUser(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      setCurrentUser(user);
+      isLoading(true);
+      try {
+        const res = await axios.post(`${API_BASE}/get-output`, { uid: user.id });
+        setudata(res.data.outputs);
+      } catch (error) {
+        console.log(error.message);
       }
-    });
+      isLoading(false);
+    } else {
+      setnotaUser(true);
+    }
   };
 
   useEffect(() => {
@@ -76,7 +75,7 @@ export default function SavedNotes() {
     setshowURL(true);
     setLoadingURL(true);
     try {
-      const docResponse = await axios.post(`${API_BASE}/api/share-output`, { user_id: currentUser.uid, doc_id: id });
+      const docResponse = await axios.post(`${API_BASE}/api/share-output`, { user_id: currentUser.id, doc_id: id });
       setURL(`https://critiqueai.dev/shared/${docResponse.data.sharedDocId}`);
       setLoadingURL(false);
     } catch (error) {
@@ -88,7 +87,7 @@ export default function SavedNotes() {
   const deleteDocument = async (e, id) => {
     e.stopPropagation();
     try {
-      await axios.delete(`${API_BASE}/api/delete-output`, { data: { user_id: currentUser.uid, doc_id: id } });
+      await axios.delete(`${API_BASE}/api/delete-output`, { data: { user_id: currentUser.id, doc_id: id } });
       fetchUserDetail();
     } catch (error) {
       console.log(error.message);

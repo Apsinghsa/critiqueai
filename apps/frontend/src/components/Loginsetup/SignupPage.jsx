@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import '../../styles/LoginSetup/SignupPage.css';
 import { FaEye } from 'react-icons/fa';
 import { FiEyeOff } from 'react-icons/fi';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth, db } from '../firebase/firebase';
-import { setDoc, doc } from 'firebase/firestore';
+import { supabase } from '../../lib/supabase';
 import { Slide, toast, ToastContainer } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
 import { IoMdArrowRoundBack } from "react-icons/io";
@@ -98,16 +96,12 @@ export default function SignUpPage() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      const user = auth.currentUser;
-      if (user) {
-        await setDoc(doc(db, "Users", user.uid), {
-          firstName: firstName,
-          lastName: lastName,
-          email: user.email,
-          Date: new Date(Date.now()).toLocaleString()
-        })
-      }
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: `${firstName} ${lastName}` } }
+      });
+      if (error) throw error;
 
       toast.success("Account created successfully", {
         position: "top-center",

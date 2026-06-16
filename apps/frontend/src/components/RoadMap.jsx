@@ -6,7 +6,7 @@ import { MdContentCopy } from 'react-icons/md';
 import { RiCloseLargeLine } from 'react-icons/ri';
 import { TfiSave } from 'react-icons/tfi';
 import axios from 'axios';
-import { auth } from './firebase/firebase';
+import { supabase } from '../lib/supabase';
 import { Slide, toast, ToastContainer } from 'react-toastify';
 import html2pdf from "html2pdf.js";
 import { IoMdClose } from "react-icons/io";
@@ -207,14 +207,19 @@ export default function RoadMap() {
 
 
     useEffect(() => {
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                setvaluser(user.uid);
+        const getUser = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) setvaluser(user.id);
+            else setvaluser("");
+        };
+        getUser();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+            (event, session) => {
+                if (session?.user) setvaluser(session.user.id);
+                else setvaluser("");
             }
-            else {
-                setvaluser("");
-            }
-        })
+        );
+        return () => subscription.unsubscribe();
     }, [])
 
 

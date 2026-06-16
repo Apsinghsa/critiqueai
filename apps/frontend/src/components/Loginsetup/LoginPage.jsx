@@ -2,12 +2,9 @@ import { useState, useEffect } from 'react';
 import '../../styles/LoginSetup/LoginPage.css';
 import { FaEye, FaGoogle } from 'react-icons/fa';
 import { FiEyeOff } from 'react-icons/fi';
-import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
-import { auth, db } from '../firebase/firebase';
+import { supabase } from '../../lib/supabase';
 import { Slide, toast, ToastContainer } from 'react-toastify';
 import { Link, useNavigate } from 'react-router-dom';
-import { GoogleAuthProvider } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
 import { IoMdArrowRoundBack } from "react-icons/io";
 
 
@@ -89,8 +86,9 @@ export default function LoginPage() {
         e.preventDefault();
 
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            
+            const { error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) throw error;
+
             console.log("Logged SuccessFully");
             toast.success("Logged in successfully", {
                 position: "top-center",
@@ -124,20 +122,9 @@ export default function LoginPage() {
     };
 
     const signinWithGoogle = async () => {
-        const Provider = new GoogleAuthProvider();
         try {
-            const result = await signInWithPopup(auth, Provider);
-            const GoogleUser = result.user.auth.currentUser;
-
-            if (GoogleUser) {
-                let fname = result.user.reloadUserInfo.displayName;
-                await setDoc(doc(db, "Users", GoogleUser.uid), {
-                    firstName: fname.split(" ")[0],
-                    lastName: fname.split(" ")[1] || "",
-                    email: GoogleUser.reloadUserInfo.email,
-                    Date: new Date(Date.now()).toLocaleString()
-                });
-            }
+            const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+            if (error) throw error;
 
             toast.success("Logged in successfully", {
                 position: "top-center",

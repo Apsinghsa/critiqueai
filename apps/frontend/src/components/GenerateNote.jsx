@@ -16,7 +16,7 @@ import { TfiSave } from 'react-icons/tfi';
 import { RiCloseLargeLine } from 'react-icons/ri';
 import axios from 'axios';
 import { Slide, toast, ToastContainer } from 'react-toastify';
-import { auth } from './firebase/firebase';
+import { supabase } from '../lib/supabase';
 import html2pdf from "html2pdf.js";
 import { useNavigate } from 'react-router-dom';
 import { IoMdClose } from 'react-icons/io';
@@ -226,14 +226,19 @@ export default function GenerateNote() {
   }
 
   useEffect(() => {
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        setvaluser(user.uid);
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) setvaluser(user.id);
+      else setvaluser("");
+    };
+    getUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) setvaluser(session.user.id);
+        else setvaluser("");
       }
-      else {
-        setvaluser("");
-      }
-    })
+    );
+    return () => subscription.unsubscribe();
   }, [])
 
 
