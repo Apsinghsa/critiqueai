@@ -8,7 +8,7 @@ import axios from 'axios';
 import html2pdf from "html2pdf.js";
 import { supabase } from '../../lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://critiqueai-app-react-952301619936.us-central1.run.app";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 function Viewed() {
 

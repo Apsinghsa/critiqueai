@@ -6,7 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { IoMdClose } from "react-icons/io";
 import { FaChevronDown, FaChevronUp, FaSearch, FaTimes } from "react-icons/fa";
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://critiqueai-app-react-952301619936.us-central1.run.app";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function SavedNotes() {
   const navigate = useNavigate();

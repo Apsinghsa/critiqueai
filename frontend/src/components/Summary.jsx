@@ -12,7 +12,7 @@ import html2pdf from "html2pdf.js";
 import { IoMdClose } from 'react-icons/io';
 import { useNavigate } from 'react-router-dom';
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://critiqueai-app-react-952301619936.us-central1.run.app";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 export default function Summary() {
     const fileInputRef = useRef(null);

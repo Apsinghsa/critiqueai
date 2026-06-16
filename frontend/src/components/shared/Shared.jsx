@@ -7,6 +7,8 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from 'axios';
 import html2pdf from "html2pdf.js";
 
+const API_BASE = import.meta.env.VITE_API_URL;
+
 
 function Shared() {
 
@@ -89,7 +91,7 @@ function Shared() {
         try {
 
             setLoading(true)
-            const response = await axios.get(`https://critiqueai-app-react-952301619936.us-central1.run.app/shared/${id}`);
+            const response = await axios.get(`${API_BASE}/shared/${id}`);
             console.log(response.data);
             setshared(response.data.content)
             setLoading(false)

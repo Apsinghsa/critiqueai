@@ -4,7 +4,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaClipboardCheck, FaCloudUploadAlt, FaCopy, FaRedo, FaRobot, FaStar } from 'react-icons/fa';
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL || "https://critiqueai-app-react-952301619936.us-central1.run.app";
+const API_BASE = import.meta.env.VITE_API_URL;
 
 const EvaluateInput = () => {
   const fileInputRef = useRef(null);
