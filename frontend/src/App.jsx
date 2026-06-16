@@ -12,7 +12,6 @@ import SavedNotes from "./components/SavedNotes.jsx"
 import Shared from "./components/shared/Shared.jsx"
 import View from "./components/shared/View.jsx"
 import ErrorPage from "./components/shared/ErrorPage.jsx"
-import { useEffect } from "react"
 
 function Homepagefunc() {
   return (
@@ -103,18 +102,6 @@ function Errorpage() {
 
 
 function App() {
-
-  useEffect(() => {
-    const handleUnload = () => {
-      localStorage.clear();
-    };
-
-    window.addEventListener('beforeunload', handleUnload);
-
-    return () => {
-      window.removeEventListener('beforeunload', handleUnload);
-    };
-  }, []);
 
   return (
     <>

@@ -39,30 +39,6 @@ const Navbar = () => {
 
 
   // Other useEffect hooks and functions remain the same...
-  useEffect(() => {
-    // Load particles.js
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js';
-    script.onload = () => {
-      if (window.particlesJS) {
-        window.particlesJS.load('particles-js', '/particles-config.json', function () {
-          console.log('particles.js config loaded');
-        });
-      }
-    };
-    document.body.appendChild(script);
-
-    // Load custom script.js if needed
-    const customScript = document.createElement('script');
-    customScript.src = '/script.js';
-    customScript.async = true;
-    document.body.appendChild(customScript);
-
-    return () => {
-      document.body.removeChild(script);
-      document.body.removeChild(customScript);
-    };
-  }, []);
 
 
 

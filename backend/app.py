@@ -67,12 +67,12 @@ Don't add any greeting and thank you note.
 # Initialize Flask app
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
-CORS(app, origins=["http://localhost:3000", "http://localhost:8000"])
+CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"])
 
 # Configure the Google Generative AI API
 client = genai.Client(api_key=os.getenv('GEN_API2'))
-FLASH = 'gemini-2.0-flash'
-FLASH_LITE = 'gemini-2.0-flash-lite'
+FLASH = 'gemini-2.5-flash'
+FLASH_LITE = 'gemini-2.5-flash-lite'
 
 # Initialize Supabase client
 SUPABASE_URL = os.getenv('SUPABASE_URL')
@@ -554,9 +554,14 @@ def generate_content():
                 return jsonify({"output": temp}), 200
 
             except Exception as e:
+                print("GEMINI API ERROR:", type(e).__name__, str(e))
+                import traceback
+                traceback.print_exc()
                 return jsonify({"error": f"Error Generating Notes: {str(e)}"}), 500
     except Exception as e:
-        print("ERROR: ", str(e))
+        print("ERROR:", type(e).__name__, str(e))
+        import traceback
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -575,7 +580,6 @@ def get_roadmap():
                 model=FLASH,
                 contents=full_prompt,
                 config=types.GenerateContentConfig(
-                    max_output_tokens=2500,
                     temperature=0.5
                 )
             )
@@ -884,4 +888,4 @@ def evaluate():
 
 # Run the app in debug mode for development
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)

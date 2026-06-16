@@ -46,6 +46,7 @@ images/
 
 # JSON files (except package*.json)
 *.json
+!package.json
 !apps/frontend/package.json
 !apps/frontend/package-lock.json
 !docker-compose.json

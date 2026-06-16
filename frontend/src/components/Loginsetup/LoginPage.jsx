@@ -125,25 +125,6 @@ export default function LoginPage() {
         try {
             const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
             if (error) throw error;
-
-            toast.success("Logged in successfully", {
-                position: "top-center",
-                autoClose: 2000,
-                transition: Slide,
-            });
-
-            setTimeout(() => {
-                const savedData = JSON.parse(localStorage.getItem('formData'));
-                const restorePath = localStorage.getItem('restorePath');
-
-                if (savedData) {
-                    navigate(restorePath);
-                }
-                else {
-                    navigate("/");
-                }
-            }, 2000);
-
         } catch (error) {
             console.log(error);
             toast.error("Google login failed", {
