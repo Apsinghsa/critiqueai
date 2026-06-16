@@ -16,6 +16,7 @@ from dotenv import load_dotenv
 import io
 import base64
 from supabase import create_client, Client
+import traceback
 
 
 # Load environment variables from .env file
@@ -555,12 +556,10 @@ def generate_content():
 
             except Exception as e:
                 print("GEMINI API ERROR:", type(e).__name__, str(e))
-                import traceback
                 traceback.print_exc()
                 return jsonify({"error": f"Error Generating Notes: {str(e)}"}), 500
     except Exception as e:
         print("ERROR:", type(e).__name__, str(e))
-        import traceback
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
@@ -594,6 +593,8 @@ def get_roadmap():
                 return jsonify({"error": "Failed to generate roadmap"}), 500
 
         except Exception as e:
+            print("ROADMAP ERROR:", type(e).__name__, str(e))
+            traceback.print_exc()
             return jsonify({"error": f"Error generating roadmap: {str(e)}"}), 500
 
 
@@ -662,6 +663,8 @@ def summary_out():
             else:
                 return jsonify({"error": "Invalid input received. No files or text provided."}), 400
         except Exception as e:
+            print("SUMMARY ERROR:", type(e).__name__, str(e))
+            traceback.print_exc()
             return jsonify({"error": f"Server exception: {str(e)}"}), 500
 
 
@@ -691,6 +694,8 @@ def get_output():
         outputs = get_output_helper(user)
         return jsonify({"outputs": outputs})
     except Exception as e:
+        print("GET_OUTPUT ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -714,6 +719,8 @@ def view_output():
             return jsonify({"error": "Document not found"}), 404
 
     except Exception as e:
+        print("VIEW ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -732,6 +739,8 @@ def delete_output():
         ).eq('user_id', user_id).execute()
         return jsonify({"status": "success"}), 200
     except Exception as e:
+        print("DELETE_OUTPUT ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -771,6 +780,8 @@ def get_shared_doc(doc_id):
             return jsonify({"error": "Shared document not found"}), 404
 
     except Exception as e:
+        print("SHAREDOC ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
@@ -883,6 +894,8 @@ def evaluate():
                 return jsonify({"error": "No valid input provided"}), 400
 
     except Exception as e:
+        print("EVALUATE ERROR:", type(e).__name__, str(e))
+        traceback.print_exc()
         return jsonify({"error": str(e)}), 500
 
 
