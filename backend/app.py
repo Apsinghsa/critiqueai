@@ -67,7 +67,7 @@ Don't add any greeting and thank you note.
 # Initialize Flask app
 app = Flask(__name__)
 # app.secret_key = os.urandom(24)
-CORS(app, origins=["http://localhost:3000", "http://localhost:5173", "http://localhost:8000"])
+CORS(app, origins=os.getenv('CORS_ORIGINS', 'http://localhost:3000,http://localhost:5173,http://localhost:8000').split(','))
 
 # Configure the Google Generative AI API
 client = genai.Client(api_key=os.getenv('GEN_API2'))
