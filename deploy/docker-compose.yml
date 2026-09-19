@@ -1,0 +1,17 @@
+name: critiqueai
+
+services:
+  backend:
+    image: ghcr.io/apsinghsa/critiqueai-backend:latest
+    container_name: critiqueai-backend
+    restart: unless-stopped
+    env_file:
+      - prod.env
+    ports:
+      - "5003:8080"   # host 5003 -> container 8080 (gunicorn)
+    networks:
+      - critiqueai-net
+
+networks:
+  critiqueai-net:
+    driver: bridge
